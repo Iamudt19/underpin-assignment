@@ -4,6 +4,20 @@ const taskRoutes = require('./routes/tasks');
 const app = express();
 
 app.use(express.json());
+
+// Health-check / root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Task Manager API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      tasks: '/tasks',
+      stats: '/tasks/stats',
+    },
+  });
+});
+
 app.use('/tasks', taskRoutes);
 
 app.use((err, req, res, next) => {
