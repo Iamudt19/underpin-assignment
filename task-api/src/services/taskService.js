@@ -8,8 +8,10 @@ const findById = (id) => tasks.find((t) => t.id === id);
 
 const getByStatus = (status) => tasks.filter((t) => t.status.includes(status));
 
+// BUG FIX: Changed `page * limit` → `(page - 1) * limit`
+// Page 1 should start at index 0, not at index `limit`.
 const getPaginated = (page, limit) => {
-  const offset = page * limit;
+  const offset = (page - 1) * limit;
   return tasks.slice(offset, offset + limit);
 };
 
@@ -76,6 +78,21 @@ const completeTask = (id) => {
   return updated;
 };
 
+// NEW FEATURE: Assign a task to a person.
+// Design decisions:
+//   - assignee is stored as a simple string on the task object
+//   - empty/whitespace-only strings are rejected (400)
+//   - re-assigning an already-assigned task is allowed (overwrites)
+//   - returns null if the task ID doesn't exist (caller sends 404)
+const assignTask = (id, assignee) => {
+  const index = tasks.findIndex((t) => t.id === id);
+  if (index === -1) return null;
+
+  const updated = { ...tasks[index], assignee };
+  tasks[index] = updated;
+  return updated;
+};
+
 const _reset = () => {
   tasks = [];
 };
@@ -90,5 +107,6 @@ module.exports = {
   update,
   remove,
   completeTask,
+  assignTask,
   _reset,
 };

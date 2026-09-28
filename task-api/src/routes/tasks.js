@@ -69,4 +69,24 @@ router.patch('/:id/complete', (req, res) => {
   res.json(task);
 });
 
+// NEW FEATURE: PATCH /tasks/:id/assign
+// Accepts { "assignee": "string" } in the request body.
+// Validates that assignee is a non-empty string; returns 400 otherwise.
+// Returns 404 if the task doesn't exist.
+// Re-assigning an already-assigned task simply overwrites the assignee.
+router.patch('/:id/assign', (req, res) => {
+  const { assignee } = req.body;
+
+  if (!assignee || typeof assignee !== 'string' || assignee.trim() === '') {
+    return res.status(400).json({ error: 'assignee is required and must be a non-empty string' });
+  }
+
+  const task = taskService.assignTask(req.params.id, assignee.trim());
+  if (!task) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+
+  res.json(task);
+});
+
 module.exports = router;
